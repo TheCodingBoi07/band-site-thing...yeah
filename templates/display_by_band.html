@@ -1,0 +1,30 @@
+{% extends "base.html" %} {% block content %}
+<h2>Bands</h2>
+
+{% for band in bands %}
+<section>
+  <h3>
+    {{ band.BandName }} ({{ band.FormedYear }}) {#
+    <a href="{{url_for('edit_band', id=band.BandID)}}">Edit</a>
+    <a href="{{url_for('delete_band', id=band.BandID)}}">Delete</a> #}
+  </h3>
+  <p><strong>Home:</strong> {{ band.HomeLocation }}</p>
+
+  <h4>Members (shortcut)</h4>
+  <ul>
+    {% for member in band.members %}
+    <li>{{ member.MemberName }}</li>
+    {% else %}
+    <li><em>No members assigned yet</em></li>
+    {% endfor %}
+  </ul>
+
+  <h4>Albums</h4>
+  <ul>
+    {% for album in band.albums %}
+    <li>{{ album.AlbumTitle }} ({{ album.ReleaseYear }})</li>
+    {% endfor %}
+  </ul>
+</section>
+<hr />
+{% endfor %} {% endblock %}
