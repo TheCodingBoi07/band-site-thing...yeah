@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Add Band</h2>
+<form method="post" id="bandForm">
+    <label>Name:</label><input type="text" name="bandname"><br>
+    <label>Formed Year:</label><input type="number" name="formedyear"><br>
+    <label>Home Location:</label><input type="text" name="homelocation"><br>
+    <button type="submit">Save</button>
+</form>
+{% endblock %}

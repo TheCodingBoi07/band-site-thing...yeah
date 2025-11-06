@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Rock Bands</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}"
+    />
+    <script src="{{ url_for('static', filename='scripts.js') }}" defer></script>
+  </head>
+  <body>
+    <header>
+      <h1>Collection of Great Rock Bands</h1>
+      <nav>
+        <a href="{{ url_for('index') }}">Home</a> |
+        <a href="{{ url_for('add_band') }}">Add Band</a> |
+        <a href="{{ url_for('add_member') }}">Add Member</a> |
+        <a href="{{ url_for('add_album') }}">Add Album</a> |
+        <a href="{{ url_for('add_membership') }}">Add Membership</a> |
+        <a href="{{ url_for('view_by_band') }}">View Band Info</a>
+      </nav>
+    </header>
+    <main>
+      {% with messages = get_flashed_messages(with_categories=true) %} {% if
+      messages %} {% for category, msg in messages %}
+      <p class="{{ category }}">{{ msg }}</p>
+      {% endfor %} {% endif %} {% endwith %} {% block content %}{% endblock %}
+    </main>
+  </body>
+</html>

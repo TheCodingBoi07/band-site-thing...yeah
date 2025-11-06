@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Add Member</h2>
+<form method="post" id="memberForm">
+    <label>Name:</label><input type="text" name="membername"><br>
+    <label>Main Position:</label><input type="text" name="mainposition"><br>
+
+    <!-- <label>Band:</label>
+    <select name="bandid">
+        {% for band in bands %}
+        <option value="{{ band.BandID }}">{{ band.BandName }}</option>
+        {% endfor %}
+    </select><br> -->
+
+    <button type="submit">Save</button>
+</form>
+{% endblock %}

@@ -1,0 +1,24 @@
+{% extends "base.html" %} {% block content %}
+<h2>Assign Member to Band (Membership)</h2>
+<form method="post" id="membershipForm">
+  <label>Band:</label>
+  <select name="bandid">
+    <option value="">-- select band --</option>
+    {% for band in bands %}
+    <option value="{{ band.BandID }}">{{ band.BandName }}</option>
+    {% endfor %}</select
+  ><br />
+  <label>Member:</label>
+  <select name="memberid">
+    <option value="">-- select member --</option>
+    {% for member in members %}
+    <option value="{{ member.MemberID }}">{{ member.MemberName }}</option>
+    {% endfor %}</select
+  ><br />
+  <label>Role:</label><input type="text" name="role" /><br />
+  <label>Start Year:</label><input type="number" name="startyear" /><br />
+  <label>End Year (leave blank if active):</label
+  ><input type="number" name="endyear" /><br />
+  <button type="submit">Save Membership</button>
+</form>
+{% endblock %}
