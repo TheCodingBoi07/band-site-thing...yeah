@@ -26,9 +26,16 @@ class Bands(db.Model):
     HomeLocation = db.Column(db.String(80))
  
     memberships = db.relationship('Memberships', back_populates='band', lazy=True)
-    albums = db.relationship('Albums', backref='band', lazy=True)
+    band_albums = db.relationship('BandAlbums', back_populates='band', lazy=True)
 
-    # Direct many-to-many shortcut
+    # Direct shortcuts for many-to-many relationships
+    albums = db.relationship(
+        'Albums',
+        secondary='band_albums',
+        back_populates='bands',
+        viewonly=True
+    )
+    
     members = db.relationship(
         'Members',
         secondary='memberships',
@@ -63,14 +70,35 @@ class Memberships(db.Model):
 
     band = db.relationship('Bands', back_populates='memberships')
     member = db.relationship('Members', back_populates='memberships')
+    
+    # FIXED: Removed incorrect band_albums and bands relationships that referenced Albums
 
 
 class Albums(db.Model):
     AlbumID = db.Column(db.Integer, primary_key=True)
-    BandID = db.Column(db.Integer, db.ForeignKey(
-        'bands.BandID'), nullable=False)
     AlbumTitle = db.Column(db.String(80), nullable=False)
     ReleaseYear = db.Column(db.Integer)
+
+    # FIXED: Added missing band_albums relationship
+    band_albums = db.relationship('BandAlbums', back_populates='album', lazy=True)
+    
+    # FIXED: Added direct shortcut for many-to-many relationship
+    bands = db.relationship(
+        'Bands',
+        secondary='band_albums',
+        back_populates='albums',
+        viewonly=True
+    )
+
+
+class BandAlbums(db.Model):
+    __tablename__ = 'band_albums'
+    id = db.Column(db.Integer, primary_key=True)
+    BandID = db.Column(db.Integer, db.ForeignKey('bands.BandID'), nullable=False)
+    AlbumID = db.Column(db.Integer, db.ForeignKey('albums.AlbumID'), nullable=False)
+
+    band = db.relationship('Bands', back_populates='band_albums')
+    album = db.relationship('Albums', back_populates='band_albums')
 
 # ==========================
 # ROUTES
@@ -103,7 +131,6 @@ def add_member():
         new_member = Members(
             MemberName=request.form['membername'],
             MainPosition=request.form['mainposition']
-            # BandID=request.form['bandid']
         )
         db.session.add(new_member)
         db.session.commit()
@@ -115,12 +142,20 @@ def add_member():
 def add_album():
     bands = Bands.query.all()
     if request.method == 'POST':
+        # FIXED: Removed invalid BandID field from Albums
         new_album = Albums(
             AlbumTitle=request.form['albumtitle'],
-            ReleaseYear=request.form['releaseyear'],
-            BandID=request.form['bandid']
+            ReleaseYear=int(request.form['releaseyear'])
         )
         db.session.add(new_album)
+        db.session.flush()  # FIXED: Get the AlbumID before committing
+        
+        # FIXED: Create the band-album association properly
+        band_album = BandAlbums(
+            BandID=int(request.form['bandid']),
+            AlbumID=new_album.AlbumID
+        )
+        db.session.add(band_album)
         db.session.commit()
         return redirect(url_for('index'))
     return render_template('add_album.html', bands=bands)
@@ -145,18 +180,17 @@ def add_membership():
     members = Members.query.all()
     if request.method == 'POST':
         membership = Memberships(
-            BandID=request.form.get('bandid'),
-            MemberID=request.form.get('memberid'),
+            BandID=int(request.form.get('bandid')),
+            MemberID=int(request.form.get('memberid')),
             Role=request.form.get('role'),
-            StartYear=request.form.get('startyear') or None,
-            EndYear=request.form.get('endyear') or None
+            StartYear=int(request.form.get('startyear')) if request.form.get('startyear') else None,
+            EndYear=int(request.form.get('endyear')) if request.form.get('endyear') else None
         )
         db.session.add(membership)
         db.session.commit()
         flash('Membership assigned', 'success')
         return redirect(url_for('view_by_band'))
     return render_template('add_membership.html', bands=bands, members=members)
-
 
 
 @app.route('/memberships/edit/<int:id>', methods=['GET', 'POST'])
@@ -171,7 +205,7 @@ def edit_membership(id):
         membership.StartYear = request.form.get('startyear') or None
         membership.EndYear = request.form.get('endyear') or None
         db.session.commit()
-        flash('Membership updates', 'success')
+        flash('Membership updated', 'success')
         return redirect(url_for('view_by_band'))
 
     return render_template('edit_membership.html', membership=membership, bands=bands, members=members)

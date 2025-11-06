@@ -12,17 +12,20 @@
 
   <h4>Members (shortcut)</h4>
   <ul>
-    {% for member in band.members %}
-    <li>{{ member.MemberName }}</li>
-    {% else %}
-    <li><em>No members assigned yet</em></li>
-    {% endfor %}
-  </ul>
-
-  <h4>Albums</h4>
-  <ul>
     {% for album in band.albums %}
-    <li>{{ album.AlbumTitle }} ({{ album.ReleaseYear }})</li>
+    <li>
+      {{ album.AlbumTitle }} ({{ album.ReleaseYear }})
+      <br>
+      <small>Collaborating bands:
+        {% for other_band in album.bands %}
+        {% if other_band.BandID !=band.BandID %}
+        {{ other_band.BandName }}
+        {% endif %}
+        {% else %}
+        None
+        {% endfor %}
+      </small>
+    </li>
     {% endfor %}
   </ul>
 </section>
